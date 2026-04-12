@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 from huggingface_hub import from_pretrained_keras
 
-st.header("tooth detection and segmentation in panoramic X-Rays")
+st.header("Tooth detection and segmentation in panoramic X-Rays")
 st.subheader("Iteration to improve demo")
 st.markdown(
     """
@@ -118,4 +118,3 @@ if archivo_imagen is not None:
         st.write(output.shape)
         st.image(output, width=850)
         
-    st.markdown("Thanks for using our demo!")
