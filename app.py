@@ -63,19 +63,19 @@ with col1:
     ex = Image.open(ejemplos[0])
     st.image(ex, width=200)
     ## If the button is pressed, we will use this example in the model
-    if st.button("Corre este ejemplo 1"):
+    if st.button("Run this example 1"):
         archivo_imagen = ejemplos[0]
 
 with col2:
     ex1 = Image.open(ejemplos[1])
     st.image(ex1, width=200)
-    if st.button("Corre este ejemplo 2"):
+    if st.button("Run this example 2"):
         archivo_imagen = ejemplos[1]
 
 with col3:
     ex2 = Image.open(ejemplos[2])
     st.image(ex2, width=200)
-    if st.button("Corre este ejemplo 3"):
+    if st.button("Run this example 3"):
         archivo_imagen = ejemplos[2]
 
 ## If we have an image to input into the model, 
@@ -114,15 +114,53 @@ if archivo_imagen is not None:
 
     ## If we successfully obtained a result, display it in the interface
     if output is not None:
-        st.subheader("Segmentación:")
+        st.subheader("Image segmentation:")
         st.write(output.shape)
         st.image(output, width=850)
 
 
     ## This will provide a dashboard
     ## If we successfully obtained a result, display it in the interface
+    ## If we have an image to input into the model, 
+## we process it and feed it to the model
+if archivo_imagen is not None:
+    ## Load the image with PIL and display it immediately
+    img = Image.open(archivo_imagen)
+    st.image(img, width=850)
+    
+    ## Trigger the loading spinner for the heavy lifting
+    with st.spinner('Analyzing panoramic X-ray. This may take a few seconds...'):
+        img = np.array(img)    #Creates a writable copy
+
+        ## Process the image for model input
+        img_cv = convertir_one_channel(img)
+        img_cv = cv2.resize(img_cv, (512, 512), interpolation=cv2.INTER_LANCZOS4)
+        img_cv = np.float32(img_cv / 255)
+        img_cv = np.reshape(img_cv, (1, 512, 512, 1))
+
+        ## Feed the NumPy array into the model
+        predicted = model.predict(img_cv)
+        predicted = predicted[0]
+
+        ## Resize the image back to its original shape and add the segmentation masks
+        predicted = cv2.resize(
+            predicted, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_LANCZOS4)
+        
+        mask = np.uint8(predicted * 255)
+        _, mask = cv2.threshold(
+            mask, thresh=0, maxval=255, type=cv2.THRESH_BINARY + cv2.THRESH_OTSU
+        )
+        
+        kernel = np.ones((5, 5), dtype=np.float32)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=1)
+        
+        cnts, hieararch = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        output = cv2.drawContours(convertir_one_channel(img), cnts, -1, (255, 0, 0), 3)
+
+    ## If we successfully obtained a result, display it in the interface
     if output is not None:
-        st.subheader("Segmentación:")
+        st.subheader("Image segmentation:")
         st.write(output.shape)
         st.image(output, width=850)
 
