@@ -40,21 +40,9 @@ The application loads a pretrained **U-Net** model from Hugging Face Hub, proces
 
 In the context of medical imaging, **semantic segmentation** is particularly valuable because clinical decisions often depend on the exact shape, area, and spatial relationships of anatomical structures.
 
-┌─────────────────────────────────────────────────────────┐
-│                    Input X-Ray Image                    │
-│                                                         │
-│    ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐   │
-│    │Tooth1│  │Tooth2│  │Tooth3│  │Tooth4│  │Tooth5│   │
-│    └──────┘  └──────┘  └──────┘  └──────┘  └──────┘   │
-│                                                         │
-│         U-Net Encoder  >>>  Decoder + Skip Connections  │
-│                                                         │
-│    ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐   │
-│    │ Mask │  │ Mask │  │ Mask │  │ Mask │  │ Mask │   │
-│    └──────┘  └──────┘  └──────┘  └──────┘  └──────┘   │
-│                                                         │
-│                  Segmented Output + Metrics              │
-└─────────────────────────────────────────────────────────┘
+<p align="center">
+  <img src="docs/segmentation_pipeline.svg" alt="U-Net segmentation pipeline diagram" width="700"/>
+</p>
 
 
 ---
