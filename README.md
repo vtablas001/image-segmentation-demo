@@ -1,4 +1,4 @@
-# 🦷 Tooth Segmentation in Panoramic X-Rays
+# Tooth Segmentation in Panoramic X-Rays
 
 I created this interactive Streamlit application that performs automatic semantic segmentation of teeth in panoramic dental X-ray images using a pretrained U-Net Convolutional Neural Network. You can upload a panoramic radiograph or use one of the built-in examples to instantly visualize segmented tooth boundaries, estimated tooth counts, and per-tooth diagnostic metrics.
 
