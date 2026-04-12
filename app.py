@@ -4,24 +4,30 @@ import numpy as np
 import cv2
 from huggingface_hub import from_pretrained_keras
 
-st.header("Segmentación de dientes con rayos X")
+st.header("tooth detection and segmentation in panoramic X-Rays")
 st.subheader("Iteration to improve demo")
 st.markdown(
     """
-    Demo for testing image segmentation
+    Demo for testing image segmentation CNN model
 """
 )
 
-
-'''
-Technical Overview
-Architecture: It utilizes the U-Net architecture, a popular "encoder-decoder" convolutional neural network (CNN) specifically optimized for biomedical image segmentation where pixel-level accuracy is critical.
-Performance: In the accompanying research, the model achieved a Dice overlap score of 95.4% for overall teeth segmentation.
-Post-Processing: A key highlight of this specific implementation is the use of grayscale morphological filtering and operations applied to the sigmoid output. This reduces tooth counting errors significantly (from 26.8% down to roughly 6.2%).Dataset: The model was trained on a relatively small but highly curated dataset (approximately 105–116 panoramic images) based on work by Abdi et al. (2015).Key ApplicationsClinical Diagnosis: Assists dentists in identifying the boundaries of individual teeth to detect caries, lesions, or bone loss.
-Forensics and Identification: Automates the process of identifying dental patterns for human remains or age/gender determination.
-Treatment Planning: Provides a baseline for orthodontic therapy workups by isolating dental structures from the surrounding mandible and maxilla.
-'''
-
+st.markdown(
+    """
+    ### Technical overview
+    
+    * **Architecture:** It utilizes the U-Net architecture, a popular "encoder-decoder" convolutional neural network (CNN) specifically optimized for biomedical image segmentation where pixel-level accuracy is critical.
+    * **Performance:** In the accompanying research, the model achieved a Dice overlap score of 95.4% for overall teeth segmentation.
+    * **Post-processing:** A key highlight of this specific implementation is the use of grayscale morphological filtering and operations applied to the sigmoid output. This reduces tooth counting errors significantly (from 26.8% down to roughly 6.2%).
+    * **Dataset:** The model was trained on a relatively small but highly curated dataset (approximately 105 to 116 panoramic images) based on work by Abdi et al. (2015).
+    
+    ### Key applications
+    
+    * **Clinical diagnosis:** Assists dentists in identifying the boundaries of individual teeth to detect caries, lesions, or bone loss.
+    * **Forensics and identification:** Automates the process of identifying dental patterns for human remains or age/gender determination.
+    * **Treatment planning:** Provides a baseline for orthodontic therapy workups by isolating dental structures from the surrounding mandible and maxilla.
+    """
+)
 
 ## Select and load the model
 model_id = "SerdarHelli/Segmentation-of-Teeth-in-Panoramic-X-ray-Image-Using-U-Net"
@@ -78,7 +84,7 @@ if archivo_imagen is not None:
     ## Load the image with PIL, display it, and convert it to a NumPy array
     img = Image.open(archivo_imagen)
     st.image(img, width=850)
-    img = np.asarray(img)
+    img = np.array(img)    #Creates a writable copy
 
     ## Process the image for model input
     img_cv = convertir_one_channel(img)
