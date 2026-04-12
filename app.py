@@ -34,7 +34,7 @@ model_id = "SerdarHelli/Segmentation-of-Teeth-in-Panoramic-X-ray-Image-Using-U-N
 model = from_pretrained_keras(model_id)
 
 ## Allow the user to upload an image
-archivo_imagen = st.file_uploader("Sube aquí tu imagen.", type=["png", "jpg", "jpeg"])
+archivo_imagen = st.file_uploader("Upload your image here.", type=["png", "jpg", "jpeg"])
 
 ## If an image has more than one channel, it is converted to grayscale (1 channel)
 def convertir_one_channel(img):
@@ -120,31 +120,36 @@ if archivo_imagen is not None:
 
 
     ## This will provide a dashboard
+    ## If we successfully obtained a result, display it in the interface
+    if output is not None:
+        st.subheader("Segmentación:")
+        st.write(output.shape)
+        st.image(output, width=850)
+
         st.subheader("Diagnostic metrics overview")
-                
-                conteo_dientes = len(cnts)
-                area_total = np.sum(mask > 0)
-                area_promedio = area_total / conteo_dientes if conteo_dientes > 0 else 0
-                
-                col_m1, col_m2, col_m3 = st.columns(3)
-                col_m1.metric("Tooth count", conteo_dientes)
-                col_m2.metric("Total dental area (px)", f"{area_total:,}")
-                col_m3.metric("Average tooth area (px)", f"{int(area_promedio):,}")
-                
-                st.markdown("### Detected instances data")
-                
-                datos_dientes = []
-                for i, c in enumerate(cnts):
-                    area = cv2.contourArea(c)
-                    x, y, w, h = cv2.boundingRect(c)
-                    datos_dientes.append({
-                        "ID": i + 1,
-                        "Area (px)": area,
-                        "Width (px)": w,
-                        "Height (px)": h
-                    })
-                    
-                import pandas as pd
-                df_dientes = pd.DataFrame(datos_dientes)
-                st.dataframe(df_dientes, use_container_width=True)
-                
+        
+        conteo_dientes = len(cnts)
+        area_total = np.sum(mask > 0)
+        area_promedio = area_total / conteo_dientes if conteo_dientes > 0 else 0
+        
+        col_m1, col_m2, col_m3 = st.columns(3)
+        col_m1.metric("Estimated tooth count", conteo_dientes)
+        col_m2.metric("Total dental area (px)", f"{area_total:,}")
+        col_m3.metric("Average tooth area (px)", f"{int(area_promedio):,}")
+        
+        st.markdown("### Detected instances data")
+        
+        datos_dientes = []
+        for i, c in enumerate(cnts):
+            area = cv2.contourArea(c)
+            x, y, w, h = cv2.boundingRect(c)
+            datos_dientes.append({
+                "ID": i + 1,
+                "Area (px)": area,
+                "Width (px)": w,
+                "Height (px)": h
+            })
+            
+        import pandas as pd
+        df_dientes = pd.DataFrame(datos_dientes)
+        st.dataframe(df_dientes, use_container_width=True)
