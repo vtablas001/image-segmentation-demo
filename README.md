@@ -18,7 +18,6 @@ I created this interactive Streamlit application that performs automatic semanti
 - [Features](#features)
 - [Pipeline Architecture](#pipeline-architecture)
 - [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
 - [Key Applications](#key-applications)
 - [Technologies](#technologies)
 - [References](#references)
@@ -170,19 +169,6 @@ tensorflow==2.15.0
 opencv-python-headless
 pandas
 ```
-
----
-
-## Project Structure
-
-image-segmentation-demo/
-├── app.py               # Main Streamlit application
-├── requirements.txt     # Python dependencies
-├── dientes_1.png        # Example panoramic X-ray 1
-├── dientes_2.png        # Example panoramic X-ray 2
-├── dientes_3.png        # Example panoramic X-ray 3
-├── .gitattributes       # Git LFS configuration
-└── README.md            # Project documentation
 
 ---
 
