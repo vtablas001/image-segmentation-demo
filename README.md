@@ -1,10 +1,12 @@
+---
 title: Image Segmentation
-emoji: 🐠
-colorFrom: purple
-colorTo: green
-sdk: docker
+emoji: 🦷
+colorFrom: blue
+colorTo: indigo
+sdk: streamlit
+sdk_version: 1.31.0
+app_file: app.py
 pinned: false
-license: mit
-short_description: This is a demo for segmenting dental pieces from x-ray image
+---
 
 Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
