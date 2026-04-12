@@ -1,5 +1,6 @@
+streamlit
+huggingface_hub
+opencv-python-headless
 numpy
 Pillow
-scipy
-opencv-python
 tensorflow
