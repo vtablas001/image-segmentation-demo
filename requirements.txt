@@ -1,6 +1,6 @@
 streamlit
 huggingface_hub
+tensorflow
 opencv-python-headless
 numpy
 Pillow
-tensorflow
