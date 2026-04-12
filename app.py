@@ -148,3 +148,4 @@ if archivo_imagen is not None:
             
         df_dientes = pd.DataFrame(datos_dientes)
         st.dataframe(df_dientes, use_container_width=True)
+        
