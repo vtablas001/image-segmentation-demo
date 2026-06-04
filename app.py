@@ -5,147 +5,129 @@ import cv2
 from huggingface_hub import from_pretrained_keras
 import pandas as pd
 
-st.header("Tooth detection and segmentation in panoramic X-Rays")
-st.subheader("Iteration to improve demo")
+st.header("Tooth detection and segmentation in panoramic X-rays")
+st.subheader("Demo improvement iteration")
+st.markdown("Demo for testing an image segmentation CNN model")
+
 st.markdown(
     """
-    Demo for testing image segmentation CNN model
+### Technical overview
+
+* **Architecture:** It utilizes the U-Net architecture, a popular "encoder-decoder" convolutional neural network (CNN) specifically optimized for biomedical image segmentation where pixel-level accuracy is critical.
+* **Performance:** In the accompanying research, the model achieved a Dice overlap score of 95.4% for overall teeth segmentation.
+* **Post-processing:** A key highlight of this specific implementation is the use of grayscale morphological filtering and operations applied to the sigmoid output. This reduces tooth counting errors significantly (from 26.8% down to roughly 6.2%).
+* **Dataset:** The model was trained on a relatively small but highly curated dataset (approximately 105 to 116 panoramic images) based on work by Abdi et al. (2015).
+
+### Key applications
+
+* **Clinical diagnosis:** Assists dentists in identifying the boundaries of individual teeth to detect caries, lesions, or bone loss.
+* **Forensics and identification:** Automates the process of identifying dental patterns for human remains or age/gender determination.
+* **Treatment planning:** Provides a baseline for orthodontic therapy workups by isolating dental structures from the surrounding mandible and maxilla.
 """
 )
 
-st.markdown(
-    """
-    ### Technical overview
-    
-    * **Architecture:** It utilizes the U-Net architecture, a popular "encoder-decoder" convolutional neural network (CNN) specifically optimized for biomedical image segmentation where pixel-level accuracy is critical.
-    * **Performance:** In the accompanying research, the model achieved a Dice overlap score of 95.4% for overall teeth segmentation.
-    * **Post-processing:** A key highlight of this specific implementation is the use of grayscale morphological filtering and operations applied to the sigmoid output. This reduces tooth counting errors significantly (from 26.8% down to roughly 6.2%).
-    * **Dataset:** The model was trained on a relatively small but highly curated dataset (approximately 105 to 116 panoramic images) based on work by Abdi et al. (2015).
-    
-    ### Key applications
-    
-    * **Clinical diagnosis:** Assists dentists in identifying the boundaries of individual teeth to detect caries, lesions, or bone loss.
-    * **Forensics and identification:** Automates the process of identifying dental patterns for human remains or age/gender determination.
-    * **Treatment planning:** Provides a baseline for orthodontic therapy workups by isolating dental structures from the surrounding mandible and maxilla.
-    """
-)
-
-## Select and load the model
+# Load the pretrained U-Net model.
 model_id = "SerdarHelli/Segmentation-of-Teeth-in-Panoramic-X-ray-Image-Using-U-Net"
 model = from_pretrained_keras(model_id)
 
-## Allow the user to upload an image
-archivo_imagen = st.file_uploader("Upload your image here.", type=["png", "jpg", "jpeg"])
+image_file = st.file_uploader("Upload your image here.", type=["png", "jpg", "jpeg"])
 
-## If an image has more than one channel, it is converted to grayscale (1 channel)
-def convertir_one_channel(img):
-    if len(img.shape) > 2:
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        return img
-    else:
-        return img
 
-def convertir_rgb(img):
-    if len(img.shape) == 2:
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
-        return img
-    else:
-        return img
+def to_grayscale(image):
+    if len(image.shape) > 2:
+        return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    return image
 
-## We will manipulate the interface so we can use example images
-## If the user clicks on an example, the model will run with the following:
-ejemplos = ["dientes_1.png", "dientes_2.png", "dientes_3.png"]
 
-## Create three columns; an example image will be in each one
+def to_rgb(image):
+    if len(image.shape) == 2:
+        return cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    return image
+
+
+# Example files for quick local testing.
+example_images = ["teeth_1.png", "teeth_2.png", "teeth_3.png"]
+
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    ## The image is loaded and displayed in the interface
-    ex = Image.open(ejemplos[0])
-    st.image(ex, width=200)
-    ## If the button is pressed, we will use this example in the model
+    example = Image.open(example_images[0])
+    st.image(example, width=200)
     if st.button("Run this example 1"):
-        archivo_imagen = ejemplos[0]
+        image_file = example_images[0]
 
 with col2:
-    ex1 = Image.open(ejemplos[1])
-    st.image(ex1, width=200)
+    example = Image.open(example_images[1])
+    st.image(example, width=200)
     if st.button("Run this example 2"):
-        archivo_imagen = ejemplos[1]
+        image_file = example_images[1]
 
 with col3:
-    ex2 = Image.open(ejemplos[2])
-    st.image(ex2, width=200)
+    example = Image.open(example_images[2])
+    st.image(example, width=200)
     if st.button("Run this example 3"):
-        archivo_imagen = ejemplos[2]
+        image_file = example_images[2]
 
-## If we have an image to input into the model, 
-## we process it and feed it to the model
-if archivo_imagen is not None:
-    ## Load the image with PIL and display it immediately
-    img = Image.open(archivo_imagen)
-    st.image(img, width=850)
-    
-    ## Trigger the loading spinner for the heavy lifting
-    with st.spinner('Analyzing panoramic X-ray. This may take a few seconds...'):
-        img = np.array(img)    #Creates a writable copy
+if image_file is not None:
+    image = Image.open(image_file).convert("RGB")
+    st.image(image, width=850)
 
-        ## Process the image for model input
-        img_cv = convertir_one_channel(img)
-        img_cv = cv2.resize(img_cv, (512, 512), interpolation=cv2.INTER_LANCZOS4)
-        img_cv = np.float32(img_cv / 255)
-        img_cv = np.reshape(img_cv, (1, 512, 512, 1))
+    with st.spinner("Analyzing panoramic X-ray. This may take a few seconds..."):
+        image = np.array(image)
 
-        ## Feed the NumPy array into the model
-        predicted = model.predict(img_cv)
-        predicted = predicted[0]
+        # The model expects one grayscale channel at 512 x 512.
+        model_input = to_grayscale(image)
+        model_input = cv2.resize(
+            model_input, (512, 512), interpolation=cv2.INTER_LANCZOS4
+        )
+        model_input = np.float32(model_input / 255)
+        model_input = np.reshape(model_input, (1, 512, 512, 1))
 
-        ## Resize the image back to its original shape and add the segmentation masks
-        predicted = cv2.resize(
-            predicted, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_LANCZOS4)
-        
-        mask = np.uint8(predicted * 255)
+        prediction = model.predict(model_input)[0]
+
+        prediction = cv2.resize(
+            prediction, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_LANCZOS4
+        )
+
+        mask = np.uint8(prediction * 255)
         _, mask = cv2.threshold(
             mask, thresh=0, maxval=255, type=cv2.THRESH_BINARY + cv2.THRESH_OTSU
         )
-        
+
         kernel = np.ones((5, 5), dtype=np.float32)
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=1)
-        
-        cnts, hieararch = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        output = cv2.drawContours(convertir_one_channel(img), cnts, -1, (255, 0, 0), 3)
 
-    ## If we successfully obtained a result, display it in the interface
-    if output is not None:
+        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        segmented_image = cv2.drawContours(to_rgb(image), contours, -1, (255, 0, 0), 3)
+
+    if segmented_image is not None:
         st.subheader("Image segmentation:")
-        st.write(output.shape)
-        st.image(output, width=850)
+        st.image(segmented_image, width=850)
 
         st.subheader("Diagnostic metrics overview")
-        
-        conteo_dientes = len(cnts)
-        area_total = np.sum(mask > 0)
-        area_promedio = area_total / conteo_dientes if conteo_dientes > 0 else 0
-        
+
+        tooth_count = len(contours)
+        total_area = np.sum(mask > 0)
+        average_area = total_area / tooth_count if tooth_count > 0 else 0
+
         col_m1, col_m2, col_m3 = st.columns(3)
-        col_m1.metric("Estimated tooth count", conteo_dientes)
-        col_m2.metric("Total dental area (px)", f"{area_total:,}")
-        col_m3.metric("Average tooth area (px)", f"{int(area_promedio):,}")
-        
+        col_m1.metric("Estimated tooth count", tooth_count)
+        col_m2.metric("Total dental area (px)", f"{total_area:,}")
+        col_m3.metric("Average tooth area (px)", f"{int(average_area):,}")
+
         st.markdown("### Detected instances data")
-        
-        datos_dientes = []
-        for i, c in enumerate(cnts):
-            area = cv2.contourArea(c)
-            x, y, w, h = cv2.boundingRect(c)
-            datos_dientes.append({
+
+        tooth_data = []
+        for i, contour in enumerate(contours):
+            area = cv2.contourArea(contour)
+            _, _, w, h = cv2.boundingRect(contour)
+            tooth_data.append({
                 "ID": i + 1,
                 "Area (px)": area,
                 "Width (px)": w,
                 "Height (px)": h
             })
-            
-        df_dientes = pd.DataFrame(datos_dientes)
-        st.dataframe(df_dientes, use_container_width=True)
-        
+
+        teeth_df = pd.DataFrame(tooth_data)
+        st.dataframe(teeth_df, use_container_width=True)
