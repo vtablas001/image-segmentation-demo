@@ -13,6 +13,7 @@ I created this interactive Streamlit application that performs automatic semanti
 ## Table of Contents
 
 - [Overview](#overview)
+- [Example Image](#example-image)
 - [What Is Image Segmentation?](#what-is-image-segmentation)
 - [About the Model](#about-the-model)
 - [Features](#features)
@@ -32,6 +33,14 @@ I created this interactive Streamlit application that performs automatic semanti
 Panoramic dental X-rays (orthopantomograms) are one of the most commonly used imaging modalities in dentistry. Manually identifying and delineating individual teeth within these images is time-consuming and subject to inter-observer variability. This project demonstrates how deep learning can automate that process, delivering pixel-level tooth segmentation with a single inference pass.
 
 The application loads a pretrained **U-Net** model from Hugging Face Hub, processes the input image through a complete computer vision pipeline, and displays the segmented output alongside quantitative diagnostic metrics.
+
+---
+
+## Example Image
+
+<p align="center">
+  <img src="teeth_2.png" alt="Panoramic dental X-ray example used by the demo" width="700"/>
+</p>
 
 ---
 
