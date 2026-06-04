@@ -202,7 +202,6 @@ The pretrained model used in this demo was developed by **Selahattin Serdar Hell
 ## Author
 
 **Victor Tablas**
-- GitHub: [@vtablas001](https://github.com/vtablas001)
 - Hugging Face: [@vtablas001](https://huggingface.co/vtablas001)
 
 ---
