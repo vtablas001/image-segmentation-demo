@@ -18,6 +18,7 @@ I created this interactive Streamlit application that performs automatic semanti
 - [Features](#features)
 - [Pipeline Architecture](#pipeline-architecture)
 - [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
 - [Key Applications](#key-applications)
 - [Technologies](#technologies)
 - [References](#references)
@@ -70,7 +71,7 @@ The **U-Net** architecture (Ronneberger et al., 2015) was originally designed fo
 
 The application provides a complete end-to-end experience for dental X-ray analysis.
 
-**Image Input** allows users to upload their own panoramic X-ray in PNG, JPG, or JPEG format, or select from three built-in example images for immediate testing.
+**Image Input** allows users to upload their own panoramic X-ray in PNG, JPG, or JPEG format, or select from the three built-in examples: `teeth_1.png`, `teeth_2.png`, and `teeth_3.png`.
 
 **Real-time Segmentation** processes the uploaded image through the U-Net model and overlays detected tooth contours directly on the original image.
 
@@ -98,14 +99,17 @@ The inference pipeline follows five stages:
 # Core inference logic (simplified)
 model = from_pretrained_keras(model_id)
 
-img_cv = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-img_cv = cv2.resize(img_cv, (512, 512), interpolation=cv2.INTER_LANCZOS4)
-img_cv = np.float32(img_cv / 255).reshape(1, 512, 512, 1)
+image = Image.open(image_file).convert("RGB")
+image = np.array(image)
 
-predicted = model.predict(img_cv)[0]
-predicted = cv2.resize(predicted, (original_w, original_h))
+model_input = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+model_input = cv2.resize(model_input, (512, 512), interpolation=cv2.INTER_LANCZOS4)
+model_input = np.float32(model_input / 255).reshape(1, 512, 512, 1)
 
-mask = np.uint8(predicted * 255)
+prediction = model.predict(model_input)[0]
+prediction = cv2.resize(prediction, (image.shape[1], image.shape[0]))
+
+mask = np.uint8(prediction * 255)
 _, mask = cv2.threshold(mask, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
 kernel = np.ones((5, 5), dtype=np.float32)
@@ -113,7 +117,7 @@ mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
 mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=1)
 
 contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-output = cv2.drawContours(img, contours, -1, (255, 0, 0), 3)
+segmented_image = cv2.drawContours(image, contours, -1, (255, 0, 0), 3)
 ```
 
 ---
@@ -157,6 +161,28 @@ tensorflow==2.15.0
 opencv-python-headless
 pandas
 ```
+
+---
+
+## Project Structure
+
+```text
+image-segmentation-demo/
+|-- .gitattributes
+|-- app.py
+|-- README.md
+|-- requirements.txt
+|-- teeth_1.png
+|-- teeth_2.png
+|-- teeth_3.png
+`-- docs/
+    `-- segmentation_pipeline.svg
+```
+
+- `.gitattributes`: Git LFS tracking rules for the example image files.
+- `app.py`: Streamlit app with the model loading, image preprocessing, segmentation, and metrics.
+- `teeth_*.png`: Built-in panoramic X-ray examples used by the app buttons.
+- `docs/segmentation_pipeline.svg`: Diagram used in this README to explain the inference pipeline.
 
 ---
 
