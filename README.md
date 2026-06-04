@@ -13,7 +13,7 @@ I created this interactive Streamlit application that performs automatic semanti
 ## Table of Contents
 
 - [Overview](#overview)
-- [Example Images](#example-images)
+- [Example Image](#example-image)
 - [What Is Image Segmentation?](#what-is-image-segmentation)
 - [About the Model](#about-the-model)
 - [Features](#features)
@@ -36,18 +36,12 @@ The application loads a pretrained **U-Net** model from Hugging Face Hub, proces
 
 ---
 
-## Example Images
+## Example Image
 
 <p align="center">
   <img src="teeth_2.png" alt="Panoramic dental X-ray example used by the demo" width="700"/>
   <br/>
   <em>Original panoramic X-ray example.</em>
-</p>
-
-<p align="center">
-  <img src="docs/teeth_2_segmented.png" alt="Segmented panoramic dental X-ray example with red tooth contours" width="700"/>
-  <br/>
-  <em>Segmented preview with tooth contours highlighted.</em>
 </p>
 
 ---
@@ -193,15 +187,13 @@ image-segmentation-demo/
 |-- teeth_2.png
 |-- teeth_3.png
 `-- docs/
-    |-- segmentation_pipeline.svg
-    `-- teeth_2_segmented.png
+    `-- segmentation_pipeline.svg
 ```
 
 - `.gitattributes`: Git LFS tracking rules for the example image files.
 - `app.py`: Streamlit app with the model loading, image preprocessing, segmentation, and metrics.
 - `teeth_*.png`: Built-in panoramic X-ray examples used by the app buttons.
 - `docs/segmentation_pipeline.svg`: Diagram used in this README to explain the inference pipeline.
-- `docs/teeth_2_segmented.png`: Segmented preview image displayed in this README.
 
 ---
 
